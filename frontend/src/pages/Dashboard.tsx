@@ -17,20 +17,20 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const profile = await authService.getProfile();
+        setUser(profile.user);
+        await loadEmails();
+        await loadAccounts();
+        await loadProducts();
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    
     loadData();
   }, []);
-
-  const loadData = async () => {
-    try {
-      const profile = await authService.getProfile();
-      setUser(profile.user);
-      await loadEmails();
-      await loadAccounts();
-      await loadProducts();
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    }
-  };
 
   const loadEmails = async () => {
     try {
