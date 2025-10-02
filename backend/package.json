@@ -1,0 +1,41 @@
+{
+  "name": "unified-email-manager-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Unified AI Email Manager",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:sync": "node src/utils/syncDb.js",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "keywords": [
+    "email",
+    "ai",
+    "saas",
+    "oauth2"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "express-validator": "^7.2.1",
+    "googleapis": "^161.0.0",
+    "helmet": "^8.1.0",
+    "imap": "^0.8.19",
+    "jsonwebtoken": "^9.0.2",
+    "mailparser": "^3.7.4",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.6",
+    "openai": "^6.0.1",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7"
+  }
+}

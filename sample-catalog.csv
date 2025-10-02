@@ -1,0 +1,6 @@
+productName,productSku,description,price,category,availability
+Widget Pro,WGT-001,Professional widget tool with advanced features,99.99,Tools,true
+Widget Lite,WGT-002,Basic widget tool for everyday use,49.99,Tools,true
+SuperWidget,WGT-003,Premium widget with lifetime warranty,199.99,Tools,true
+MiniWidget,WGT-004,Compact widget for small spaces,29.99,Tools,true
+Widget Deluxe,WGT-005,Deluxe widget with extra accessories,149.99,Tools,false
