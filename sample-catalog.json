@@ -1,0 +1,42 @@
+[
+  {
+    "productName": "Widget Pro",
+    "productSku": "WGT-001",
+    "description": "Professional widget tool with advanced features",
+    "price": 99.99,
+    "category": "Tools",
+    "availability": true
+  },
+  {
+    "productName": "Widget Lite",
+    "productSku": "WGT-002",
+    "description": "Basic widget tool for everyday use",
+    "price": 49.99,
+    "category": "Tools",
+    "availability": true
+  },
+  {
+    "productName": "SuperWidget",
+    "productSku": "WGT-003",
+    "description": "Premium widget with lifetime warranty",
+    "price": 199.99,
+    "category": "Tools",
+    "availability": true
+  },
+  {
+    "productName": "MiniWidget",
+    "productSku": "WGT-004",
+    "description": "Compact widget for small spaces",
+    "price": 29.99,
+    "category": "Tools",
+    "availability": true
+  },
+  {
+    "productName": "Widget Deluxe",
+    "productSku": "WGT-005",
+    "description": "Deluxe widget with extra accessories",
+    "price": 149.99,
+    "category": "Tools",
+    "availability": false
+  }
+]
