@@ -1,40 +1,42 @@
 'use client'
 import React from 'react';
-import { List, ListItem, ListItemText, Avatar, Typography } from '@mui/material';
+import { List, ListItem, ListItemText, Avatar, Chip, Typography } from '@mui/material';
+import { Email } from '@/types';
 
-export interface Email {
-  id: string;
-  sender: string;
-  subject: string;
-  preview: string;
-  date: string;
-  isUnread: boolean;
-}
-
-export default function EmailList({
-  emails,
-  onSelect,
-}: {
+interface EmailListProps {
   emails: Email[];
   onSelect: (email: Email) => void;
-}) {
+  selectedEmailId?: string | null;
+}
+
+export default function EmailList({ emails, onSelect, selectedEmailId }: EmailListProps) {
   return (
     <List>
       {emails.map((email) => (
         <ListItem
           key={email.id}
-          button
           onClick={() => onSelect(email)}
-          sx={{ background: email.isUnread ? '#f3f4f6' : 'white' }}
+          selected={email.id === selectedEmailId}
+          alignItems="flex-start"
+          button
+          sx={{ background: email.isUnread ? '#f0f6ff' : '#fff' }}
         >
           <Avatar sx={{ mr: 2 }}>{email.sender[0].toUpperCase()}</Avatar>
           <ListItemText
             primary={
               <Typography fontWeight={email.isUnread ? 600 : 400}>
-                {email.sender} - {email.subject}
+                {email.sender} — {email.subject}
               </Typography>
             }
-            secondary={email.preview}
+            secondary={
+              <>
+                <Typography variant="body2" color="text.secondary">{email.preview}</Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {email.date} <Chip label={email.provider} size="small" sx={{ ml: 1 }} />
+                  {email.priority === 'high' && <Chip label="High" color="error" size="small" sx={{ ml: 1 }} />}
+                </Typography>
+              </>
+            }
           />
         </ListItem>
       ))}

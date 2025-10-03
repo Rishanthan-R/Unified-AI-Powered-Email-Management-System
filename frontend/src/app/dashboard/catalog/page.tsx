@@ -1,32 +1,49 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
-  Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
-} from '@mui/material';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  sku: string;
-  description: string;
-}
+  Box, Typography, Paper, Button, LinearProgress, Table,
+  TableHead, TableRow, TableCell, TableBody, TableContainer
+} from '@mui/material'
+import { motion } from 'framer-motion'
+import { CloudUpload, CheckCircleOutline } from '@mui/icons-material'
+import { uploadCatalog } from '@/lib/api'
+import { Product } from '@/types'
 
 export default function CatalogPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: 'Widget A', price: 29.99, sku: 'WID-A', description: 'Premium widget' },
-    { id: 2, name: 'Widget B', price: 19.99, sku: 'WID-B', description: 'Basic widget' }
-  ]);
+  const [file, setFile] = useState<File | null>(null)
+  const [products, setProducts] = useState<Product[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null);
-    // TODO: Parse file and update products
-  };
+    setFile(e.target.files?.[0] || null)
+    setSuccess(false)
+  }
+
+  const handleUpload = async () => {
+    if (!file) return
+    setUploading(true)
+    const form = new FormData()
+    form.append('catalog', file)
+    try {
+      await uploadCatalog(form)
+      // fetch updated catalog
+      // mock:
+      setProducts([
+        { id: 1, name: 'Widget A', price: 29.99, sku: 'WID-A', description: 'Premium widget' },
+        { id: 2, name: 'Widget B', price: 19.99, sku: 'WID-B', description: 'Basic widget' }
+      ])
+      setSuccess(true)
+    } catch {
+      setSuccess(false)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>Product Catalog Upload</Typography>
+      <Typography variant="h4" gutterBottom>Product Catalog</Typography>
       <Paper sx={{ p: 3, mb: 3 }}>
         <input
           accept=".csv,.json"
@@ -36,34 +53,65 @@ export default function CatalogPage() {
           onChange={handleFileChange}
         />
         <label htmlFor="catalog-upload">
-          <Button variant="outlined" component="span">
-            Select Catalog File
+          <Button
+            variant="outlined"
+            component="span"
+            startIcon={<CloudUpload />}
+            sx={{ mr: 2 }}
+          >
+            Choose File
           </Button>
         </label>
-        {file && <Typography sx={{ ml: 2 }}>{file.name}</Typography>}
+        {file && <Typography component="span">{file.name}</Typography>}
+
+        <Box sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleUpload}
+            disabled={!file || uploading}
+          >
+            Upload Catalog
+          </Button>
+        </Box>
+        {uploading && <LinearProgress sx={{ mt: 2 }} />}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, color: 'success.main' }}>
+              <CheckCircleOutline sx={{ mr: 1 }} />
+              <Typography>Catalog uploaded successfully!</Typography>
+            </Box>
+          </motion.div>
+        )}
       </Paper>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Product Name</TableCell>
-              <TableCell>SKU</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Description</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell>${product.price}</TableCell>
-                <TableCell>{product.description}</TableCell>
+
+      {products.length > 0 && (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product</TableCell>
+                <TableCell>SKU</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Description</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {products.map(p => (
+                <TableRow key={p.id}>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{p.sku}</TableCell>
+                  <TableCell>${p.price}</TableCell>
+                  <TableCell>{p.description}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
-  );
+  )
 }

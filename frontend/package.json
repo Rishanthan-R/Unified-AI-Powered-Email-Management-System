@@ -11,13 +11,19 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
     "@mui/icons-material": "^7.3.4",
+    "@mui/lab": "^7.0.1-beta.18",
     "@mui/material": "^7.3.4",
     "axios": "^1.12.2",
+    "framer-motion": "^12.23.22",
+    "lucide-react": "^0.544.0",
     "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "swr": "^2.3.6"
+    "react-hook-form": "^7.63.0",
+    "swr": "^2.3.6",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

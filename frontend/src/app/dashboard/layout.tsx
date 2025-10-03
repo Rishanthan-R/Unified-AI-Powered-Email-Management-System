@@ -1,43 +1,124 @@
 'use client'
-import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
-import InboxIcon from '@mui/icons-material/Inbox';
-import UploadIcon from '@mui/icons-material/CloudUpload';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import React, { useState } from 'react'
+import {
+  Box, Drawer, List, ListItem, ListItemIcon, ListItemText,
+  AppBar, Toolbar, Typography, IconButton, Badge, Avatar, Menu, MenuItem, Divider
+} from '@mui/material'
+import {
+  Menu as MenuIcon, Dashboard, Inbox, CloudUpload, BarChart,
+  Notifications, AccountCircle, DarkMode, LightMode, Logout
+} from '@mui/icons-material'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { useTheme } from '@/components/providers/ThemeProvider'
 
-const drawerWidth = 220;
+const drawerWidth = 260
+const items = [
+  { text: 'Home', icon: <Dashboard />, path: '/dashboard' },
+  { text: 'Inbox', icon: <Inbox />, path: '/dashboard/inbox' },
+  { text: 'Catalog', icon: <CloudUpload />, path: '/dashboard/catalog' },
+  { text: 'Analytics', icon: <BarChart />, path: '/dashboard/analytics' }
+]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { isDark, toggleTheme } = useTheme()
+  const path = usePathname()
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
+  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)
+  const handleMenuClose = () => setAnchorEl(null)
+
+  const drawer = (
+    <Box sx={{ bgcolor: isDark ? 'rgba(30,41,59,0.9)' : 'rgba(255,255,255,0.8)', height: '100vh', backdropFilter: 'blur(10px)' }}>
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}>
+          <Avatar sx={{ width: 64, height: 64, mx: 'auto', bgcolor: 'primary.main' }}>AI</Avatar>
+        </motion.div>
+        <Typography variant="h6" color="text.primary" sx={{ mt: 1 }}>Email AI</Typography>
+      </Box>
+      <List>
+        {items.map(({ text, icon, path: href }) => (
+          <Link href={href} key={text} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <ListItem
+              button
+              selected={path === href}
+              sx={{
+                mb: 1,
+                borderRadius: 2,
+                mx: 2,
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                },
+                '&:hover': { bgcolor: 'primary.light', color: 'white' }
+              }}
+            >
+              <ListItemIcon sx={{ color: path === href ? 'white' : 'inherit' }}>{icon}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          </Link>
+        ))}
+      </List>
+    </Box>
+  )
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-        }}
+      <AppBar
+        position="fixed"
+        color="inherit"
+        elevation={1}
+        sx={{ ml: { sm: `${drawerWidth}px` }, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
-        <Toolbar />
-        <List>
-          <ListItem button component="a" href="/dashboard">
-            <ListItemIcon><DashboardIcon /></ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-          <ListItem button component="a" href="/dashboard/inbox">
-            <ListItemIcon><InboxIcon /></ListItemIcon>
-            <ListItemText primary="Inbox" />
-          </ListItem>
-          <ListItem button component="a" href="/dashboard/catalog">
-            <ListItemIcon><UploadIcon /></ListItemIcon>
-            <ListItemText primary="Catalog Upload" />
-          </ListItem>
-        </List>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        {children}
+        <Toolbar>
+          <IconButton edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}>
+            <MenuIcon />
+          </IconButton>
+
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
+            {items.find(i => i.path === path)?.text || 'Dashboard'}
+          </Typography>
+
+          <IconButton onClick={toggleTheme} color="inherit"><>{isDark ? <LightMode /> : <DarkMode />}</></IconButton>
+          <IconButton color="inherit"><Badge badgeContent={3} color="error"><Notifications /></Badge></IconButton>
+          <IconButton onClick={handleMenuOpen}><AccountCircle /></IconButton>
+          
+          <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleMenuClose}>
+            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+            <Divider />
+            <MenuItem onClick={() => window.location.href = '/login'}><Logout sx={{ mr: 1 }} />Logout</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }}
+          sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth } }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          open
+          sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth } }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+          {children}
+        </motion.div>
       </Box>
     </Box>
-  );
+  )
 }
