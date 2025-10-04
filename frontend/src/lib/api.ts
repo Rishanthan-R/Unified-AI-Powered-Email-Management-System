@@ -1,24 +1,33 @@
-// frontend/src/lib/api.ts
+const API_BASE = process.env.NEXT_PUBLIC_API_URL!
 
-import axios from 'axios';
-import { Email, Product } from '@/types';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-export async function fetchEmails(): Promise<Email[]> {
-  const { data } = await axios.get<Email[]>(`${API_BASE}/emails`);
-  return data;
+export async function fetchEmails() {
+  const res = await fetch(`${API_BASE}/emails`); return res.json()
 }
 
-// Add this function:
-export async function uploadCatalog(form: FormData): Promise<void> {
-  await axios.post(`${API_BASE}/catalog/upload`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+export async function fetchDashboardStats() {
+  const res = await fetch(`${API_BASE}/dashboard/stats`); return res.json()
 }
 
-// If you also need fetchCatalog (optional):
-export async function fetchCatalog(): Promise<Product[]> {
-  const { data } = await axios.get<Product[]>(`${API_BASE}/catalog`);
-  return data;
+export async function uploadCatalog(form: FormData) {
+  const res = await fetch(`${API_BASE}/catalog/upload`, { method: 'POST', body: form }); return res.json()
+}
+
+export async function fetchNotifications() {
+  const res = await fetch(`${API_BASE}/notifications`); return res.json()
+}
+
+export async function fetchSettings() {
+  const res = await fetch(`${API_BASE}/settings`); return res.json()
+}
+
+export async function saveSettings(data:any) {
+  const res = await fetch(`${API_BASE}/settings`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return res.json()
+}
+
+export async function fetchProfile() {
+  const res = await fetch(`${API_BASE}/profile`); return res.json()
+}
+
+export async function saveProfile(data:any) {
+  const res = await fetch(`${API_BASE}/profile`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); return res.json()
 }

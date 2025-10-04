@@ -1,28 +1,21 @@
+// src/components/email/EmailDetail.tsx
 'use client'
-import React from 'react';
-import { Box, Typography, Paper, Chip } from '@mui/material';
-import { Email } from '@/types';
+import React from 'react'
+import { Box, Typography, Divider, Chip } from '@mui/material'
+import { Email } from '@/types'
 
-interface Props { email: Email | null }
-export default function EmailDetail({ email }: Props) {
-  if (!email) {
-    return <Typography color="textSecondary">Select an email to view details</Typography>;
-  }
+export default function EmailDetail({ email }: { email: Email }) {
   return (
-    <Paper sx={{ p: 3 }}>
-      <Box mb={2}>
-        <Typography variant="h6">{email.subject}</Typography>
-        <Typography variant="subtitle2" color="textSecondary">
-          From: {email.sender} | {email.date}{' '}
-          <Chip label={email.provider} size="small" sx={{ ml: 1 }} />
-          {email.priority === 'high' && (
-            <Chip label="High" color="error" size="small" sx={{ ml: 1 }} />
-          )}
-        </Typography>
+    <Box>
+      <Typography variant="h5" fontWeight="bold">{email.subject}</Typography>
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        From: {email.sender} | {new Date(email.date).toLocaleString()}
+      </Typography>
+      <Chip label={email.provider.toUpperCase()} color="info" size="small" sx={{ mb: 2 }} />
+      <Divider />
+      <Box mt={2}>
+        <Typography variant="body1" whiteSpace="pre-line">{email.body || email.preview}</Typography>
       </Box>
-      <Box>
-        <Typography>{email.body || email.preview}</Typography>
-      </Box>
-    </Paper>
-  );
+    </Box>
+  )
 }

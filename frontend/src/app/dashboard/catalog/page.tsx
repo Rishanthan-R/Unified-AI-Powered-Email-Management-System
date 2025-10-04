@@ -1,117 +1,177 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
-  Box, Typography, Paper, Button, LinearProgress, Table,
-  TableHead, TableRow, TableCell, TableBody, TableContainer
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  LinearProgress,
 } from '@mui/material'
+import { CloudUpload, PictureAsPdf, InsertDriveFile, Delete } from '@mui/icons-material'
 import { motion } from 'framer-motion'
-import { CloudUpload, CheckCircleOutline } from '@mui/icons-material'
-import { uploadCatalog } from '@/lib/api'
-import { Product } from '@/types'
+
+const ACCEPTED_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+  'text/plain'
+]
 
 export default function CatalogPage() {
-  const [file, setFile] = useState<File | null>(null)
-  const [products, setProducts] = useState<Product[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null)
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
+    const selectedFiles = e.target.files
+    if (!selectedFiles) return
+
+    // Filter accepted file types
+    const filtered = Array.from(selectedFiles).filter(f => ACCEPTED_FILE_TYPES.includes(f.type))
+
+    if (filtered.length !== selectedFiles.length) {
+      setError('Some files were rejected. Only PDF, Word, Excel, CSV, and Text files allowed.')
+    }
+
+    setFiles(prev => [...prev, ...filtered])
+    e.target.value = ''
     setSuccess(false)
   }
 
   const handleUpload = async () => {
-    if (!file) return
+    if (files.length === 0) {
+      setError('Please add one or more files to upload.')
+      return
+    }
     setUploading(true)
-    const form = new FormData()
-    form.append('catalog', file)
+    setError(null)
+    setSuccess(false)
+
     try {
-      await uploadCatalog(form)
-      // fetch updated catalog
-      // mock:
-      setProducts([
-        { id: 1, name: 'Widget A', price: 29.99, sku: 'WID-A', description: 'Premium widget' },
-        { id: 2, name: 'Widget B', price: 19.99, sku: 'WID-B', description: 'Basic widget' }
-      ])
+      // Prepare form data
+      const formData = new FormData()
+      files.forEach(file => formData.append('catalog', file))
+
+      // Replace with your actual API call
+      await new Promise((r) => setTimeout(r, 2000))
+
       setSuccess(true)
-    } catch {
-      setSuccess(false)
+      setFiles([])
+    } catch (e) {
+      setError('Upload failed, please try again.')
     } finally {
       setUploading(false)
     }
   }
 
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const renderIcon = (type: string) => {
+    switch (type) {
+      case 'application/pdf':
+        return <PictureAsPdf color="error" />
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return <InsertDriveFile color="primary" />
+      case 'application/vnd.ms-excel':
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return <InsertDriveFile color="success" />
+      case 'text/csv':
+      case 'text/plain':
+        return <InsertDriveFile color="secondary" />
+      default:
+        return <InsertDriveFile />
+    }
+  }
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>Product Catalog</Typography>
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Upload Your Product Catalog(s)
+      </Typography>
+
+      <Paper sx={{ p: 3, mb: 3, background: 'rgba(255,255,255,0.9)', borderRadius: 3 }}>
         <input
-          accept=".csv,.json"
-          style={{ display: 'none' }}
-          id="catalog-upload"
+          ref={fileInputRef}
           type="file"
-          onChange={handleFileChange}
+          multiple
+          accept={ACCEPTED_FILE_TYPES.join(',')}
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
         />
-        <label htmlFor="catalog-upload">
+        <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
           <Button
             variant="outlined"
-            component="span"
             startIcon={<CloudUpload />}
-            sx={{ mr: 2 }}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
           >
-            Choose File
+            Select Files
           </Button>
-        </label>
-        {file && <Typography component="span">{file.name}</Typography>}
 
-        <Box sx={{ mt: 2 }}>
           <Button
             variant="contained"
             onClick={handleUpload}
-            disabled={!file || uploading}
+            disabled={uploading || files.length === 0}
           >
-            Upload Catalog
+            {uploading ? 'Uploading...' : 'Upload Catalog'}
           </Button>
         </Box>
-        {uploading && <LinearProgress sx={{ mt: 2 }} />}
+
+        {uploading && <LinearProgress sx={{ mt: 2, borderRadius: 1 }} />}
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         {success && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, color: 'success.main' }}>
-              <CheckCircleOutline sx={{ mr: 1 }} />
-              <Typography>Catalog uploaded successfully!</Typography>
-            </Box>
-          </motion.div>
+          <Alert severity="success" sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5 }}
+              style={{ marginRight: 8 }}
+            >
+              <CheckCircleOutline color="success" />
+            </motion.div>
+            Catalog uploaded successfully!
+          </Alert>
+        )}
+
+        {files.length > 0 && (
+          <List sx={{ mt: 2, maxHeight: 300, overflowY: 'auto' }}>
+            {files.map((file, index) => (
+              <ListItem
+                key={index}
+                secondaryAction={
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveFile(index)} disabled={uploading}>
+                    <Delete />
+                  </IconButton>
+                }
+              >
+                <ListItemIcon>{renderIcon(file.type)}</ListItemIcon>
+                <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(2)} KB`} />
+              </ListItem>
+            ))}
+          </List>
         )}
       </Paper>
-
-      {products.length > 0 && (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell>SKU</TableCell>
-                <TableCell>Price</TableCell>
-                <TableCell>Description</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {products.map(p => (
-                <TableRow key={p.id}>
-                  <TableCell>{p.name}</TableCell>
-                  <TableCell>{p.sku}</TableCell>
-                  <TableCell>${p.price}</TableCell>
-                  <TableCell>{p.description}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
     </Box>
   )
 }
